@@ -5,6 +5,8 @@ WORKDIR /app
 COPY main.py .
 COPY .env .
 
+EXPOSE 9090
+
 # install dependencies
 RUN pip3 install telebot
 RUN pip3 install pyTelegramBotAPI
