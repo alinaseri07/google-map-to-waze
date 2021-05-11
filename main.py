@@ -20,41 +20,26 @@ def send_welcome(message):
 @bot.message_handler()
 def function_name(message):
     try:
-        gmapURL = re.search("(?P<url>https?://[^\s]+)", message.text).group("url")
+        gmapURL = re.search(
+            "(?P<url>https?://[^\s]+)", message.text).group("url")
         responses = requests.get(gmapURL)
-        latlng = re.search("@[0-9.,]{2,100}[,]", responses.url)
+        latlng = re.search("@[0-9.,]{2,100}[,]", str(responses.content))
+
         if latlng:
             latlng = latlng.group()
-        else:
-            latlng = 'NONE'
-        
-        if latlng in responses.url:
-
-            latlng = re.search("[0-9.,]{2,100}[,]", responses.url)
-            latlng = latlng.group()
             latlng = latlng[:-1]
-            latlng = latlng.replace(",", "%2C")
+            latlng = latlng.replace('@', '').replace(",", "%2C")
 
             finalURL = "https://www.waze.com/ul?ll=__LATLGN__&navigate=yes&zoom=17"
             finalURL = finalURL.replace("__LATLGN__", latlng)
 
             bot.send_message(message.chat.id, finalURL)
-
         else:
-            for response in responses.history:
-                if '/maps?' in response.url: 
-                    parsedURL = urlparse(response.url)
-                    print(parsedURL)
-                    latlng = re.search("[0-9,.]{2,100}", parsedURL.query)
-                    latlng = latlng.group()
-                    latlng = latlng.replace(",", "%2C")
+            bot.send_message(message.chat.id, 'Invalid URL')
 
-                    finalURL = "https://www.waze.com/ul?ll=__LATLGN__&navigate=yes&zoom=17"
-                    finalURL = finalURL.replace("__LATLGN__", latlng)
-
-                    bot.send_message(message.chat.id, finalURL)
     except:
         bot.send_message(message.chat.id, 'Invalid URL')
         return
+
 
 bot.polling()
