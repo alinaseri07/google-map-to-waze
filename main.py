@@ -22,7 +22,14 @@ def function_name(message):
     try:
         responses = requests.get(message.text)
         print(responses.url)
-        if 'consent.google.com' in responses.url:
+        latlng = re.search("@[0-9.,]{2,100}[,]", responses.url)
+        if latlng:
+            latlng = latlng.group()
+        else:
+            latlng = 'NONE'
+        
+        if latlng in responses.url:
+
             latlng = re.search("[0-9.,]{2,100}[,]", responses.url)
             latlng = latlng.group()
             latlng = latlng[:-1]
