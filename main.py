@@ -20,8 +20,8 @@ def send_welcome(message):
 @bot.message_handler()
 def function_name(message):
     try:
-        responses = requests.get(message.text)
-        print(responses.url)
+        gmapURL = re.search("(?P<url>https?://[^\s]+)", message.text).group("url")
+        responses = requests.get(gmapURL)
         latlng = re.search("@[0-9.,]{2,100}[,]", responses.url)
         if latlng:
             latlng = latlng.group()
