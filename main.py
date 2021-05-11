@@ -21,17 +21,31 @@ def send_welcome(message):
 def function_name(message):
     try:
         responses = requests.get(message.text)
-        for response in responses.history:
-            if '/maps?' in response.url: 
-                parsedURL = urlparse(response.url)
-                latlng = re.search("[0-9,.]{2,100}", parsedURL.query)
-                latlng = latlng.group()
-                latlng.replace(",", "%2C")
+        print(responses.url)
+        if 'consent.google.com' in responses.url:
+            latlng = re.search("[0-9.,]{2,100}[,]", responses.url)
+            latlng = latlng.group()
+            latlng = latlng[:-1]
+            latlng = latlng.replace(",", "%2C")
 
-                finalURL = "https://www.waze.com/ul?ll=__LATLGN__&navigate=yes&zoom=17"
-                finalURL = finalURL.replace("__LATLGN__", latlng)
+            finalURL = "https://www.waze.com/ul?ll=__LATLGN__&navigate=yes&zoom=17"
+            finalURL = finalURL.replace("__LATLGN__", latlng)
 
-                bot.send_message(message.chat.id, finalURL)
+            bot.send_message(message.chat.id, finalURL)
+
+        else:
+            for response in responses.history:
+                if '/maps?' in response.url: 
+                    parsedURL = urlparse(response.url)
+                    print(parsedURL)
+                    latlng = re.search("[0-9,.]{2,100}", parsedURL.query)
+                    latlng = latlng.group()
+                    latlng = latlng.replace(",", "%2C")
+
+                    finalURL = "https://www.waze.com/ul?ll=__LATLGN__&navigate=yes&zoom=17"
+                    finalURL = finalURL.replace("__LATLGN__", latlng)
+
+                    bot.send_message(message.chat.id, finalURL)
     except:
         bot.send_message(message.chat.id, 'Invalid URL')
         return
