@@ -22,34 +22,35 @@ def function_name(message):
         gmapURL = re.search(
             "(?P<url>https?://[^\s]+)", message.text).group("url")
         responses = requests.get(gmapURL)
-        latlng = re.search("@[0-9.,]{2,100}[,]", str(responses.content))
 
-        if latlng:
-            latlng = latlng.group()
-            latlng = latlng[:-1]
-            latlng = latlng.replace('@', '').replace(",", "%2C")
-
-            finalURL = "https://www.waze.com/ul?ll=__LATLGN__&navigate=yes&zoom=17"
-            finalURL = finalURL.replace("__LATLGN__", latlng)
-
-            bot.send_message(message.chat.id, finalURL)
-        elif responses.history:
+        if responses.history:
             for response in responses.history:
-                if '/maps?' in str(response.url):
-                    with urllib.request.urlopen(response.url) as resp:
-                        html = resp.read()
-                        latlng = re.search("@[0-9.,]{2,100}[,]", str(html))
+                with urllib.request.urlopen(response.url) as resp:
+                    html = resp.read()
+                    latlng = re.search(
+                        "([0-9]\d[.][0-9]{7},[0-9]\d.[0-9]{7})", str(html))
+
+                    if latlng:
                         latlng = latlng.group()
-                        latlng = latlng[:-1]
-                        latlng = latlng.replace('@', '').replace(",", "%2C")
+                        latlng = latlng.replace(",", "%2C")
 
                         finalURL = "https://www.waze.com/ul?ll=__LATLGN__&navigate=yes&zoom=17"
                         finalURL = finalURL.replace("__LATLGN__", latlng)
 
                         bot.send_message(message.chat.id, finalURL)
-
+                        return
         else:
-            bot.send_message(message.chat.id, 'Invalid URL')
+            latlng = re.search(
+                "([0-9]\d[.][0-9]{7},[0-9]\d.[0-9]{7})", str(responses.content))
+            if latlng:
+                latlng = latlng.group()
+                latlng = latlng.replace(",", "%2C")
+
+                finalURL = "https://www.waze.com/ul?ll=__LATLGN__&navigate=yes&zoom=17"
+                finalURL = finalURL.replace("__LATLGN__", latlng)
+
+                bot.send_message(message.chat.id, finalURL)
+                return
 
     except:
         bot.send_message(message.chat.id, 'Invalid URL 2')
